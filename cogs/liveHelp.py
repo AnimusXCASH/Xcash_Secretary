@@ -5,7 +5,7 @@ import nextcord
 from nextcord import Interaction, slash_command
 from nextcord.channel import ChannelType
 from nextcord.ext import commands
-from colorama import init
+from colorama import init, Fore
 
 init(autoreset=True)
 
@@ -18,7 +18,7 @@ class Helpers(commands.Cog):
 
     @slash_command(name="help", description="Open help thread with Staff", dm_permission=False, guild_ids=[])
     @commands.has_permissions(create_public_threads=True)
-    async def urgent_mng(self, interaction: Interaction,*,reason):
+    async def urgent_mng(self, interaction: Interaction, *, reason):
         thread = await interaction.channel.create_thread(name=f"@{interaction.user}-{interaction.user.id}",
                                                          reason='Help Wanted',
                                                          type=ChannelType.public_thread)
@@ -34,8 +34,11 @@ class Helpers(commands.Cog):
         await interaction.response.send_message(content=f'{interaction.user.mention} You have successfully opened '
                                                         f'up a thread. It can be access through link {thread.jump_url}',
                                                 ephemeral=True, delete_after=360)
+        print(
+            Fore.LIGHTBLUE_EX + f'{interaction.user} Opened HELP on channel {interaction.channel} with topic: {reason}')
 
-    @slash_command(name="discussion", description="Open up discussion (special-area)", dm_permission=False,guild_ids=[])
+    @slash_command(name="discussion", description="Open up discussion (special-area)", dm_permission=False,
+                   guild_ids=[])
     @commands.has_permissions(create_public_threads=True)
     async def help_mng(self, interaction: Interaction, *, topic):
         thread = await interaction.channel.create_thread(name=f"{topic}",
@@ -51,8 +54,10 @@ class Helpers(commands.Cog):
         await interaction.response.send_message(content=f'{interaction.user.mention} You have successfully opened '
                                                         f'up a thread. It can be access through link {thread.jump_url}',
                                                 ephemeral=True, delete_after=360)
+        print(
+            Fore.LIGHTBLUE_EX + f'{interaction.user} Opened DISCUSSION on channel {interaction.channel} with topic: {topic}')
 
-    @slash_command(name=f'close', description="Close the thread", dm_permission=False,guild_ids=[])
+    @slash_command(name=f'close', description="Close the thread", dm_permission=False, guild_ids=[])
     async def close_thread(self, interaction: Interaction):
         if isinstance(interaction.channel, nextcord.Thread):
             thread = interaction.guild.get_thread(interaction.channel.id)
