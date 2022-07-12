@@ -41,7 +41,7 @@ class Helpers(commands.Cog):
                    guild_ids=[])
     @commands.has_permissions(create_public_threads=True)
     async def help_mng(self, interaction: Interaction, topic):
-        thread = await interaction.channel.create_thread(name=f"{topic}-{str(interaction.user.id)}",
+        thread = await interaction.channel.create_thread(name=f"{topic}",
                                                          reason='Discussion topic',
                                                          type=ChannelType.public_thread)
 
