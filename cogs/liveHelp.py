@@ -40,8 +40,8 @@ class Helpers(commands.Cog):
     @slash_command(name="discussion", description="Open up discussion (special-area)", dm_permission=False,
                    guild_ids=[])
     @commands.has_permissions(create_public_threads=True)
-    async def help_mng(self, interaction: Interaction, *, topic):
-        thread = await interaction.channel.create_thread(name=f"{topic}",
+    async def help_mng(self, interaction: Interaction, topic):
+        thread = await interaction.channel.create_thread(name=f"{topic}-{str(interaction.user.id)}",
                                                          reason='Discussion topic',
                                                          type=ChannelType.public_thread)
 
@@ -64,21 +64,37 @@ class Helpers(commands.Cog):
 
             # Get user ID from thread name
             thread_name = thread.name
-            pos = thread_name.index("-")
-            owner_user_id = thread_name[pos + 1:]
+
+            try:
+                pos = thread_name.index("-")
+                owner_user_id = thread_name[pos + 1:]
+            except ValueError:
+                owner_user_id = None
+
             guild = interaction.guild
             role = guild.get_role(785818459228995584)
             all_role_members = [x.id for x in role.members]
 
-            # This breaks if its not a help thread
-            if interaction.user.id == int(
-                    owner_user_id) or interaction.user.id in all_role_members or interaction.user.id == 360367188432912385:
-                await thread.delete()
+            if owner_user_id:
+                # This breaks if its not a help thread
+                if interaction.user.id == int(
+                        owner_user_id) or interaction.user.id in all_role_members or interaction.user.id == 360367188432912385:
+                    await thread.delete()
+                else:
+                    await interaction.response.send_message(
+                        content=f'{interaction.user.mention} You are not allowed to '
+                                f'close this thread. Only the user or members with role'
+                                f' @contributors can do so', ephemeral=True,
+                        delete_after=30)
             else:
-                await interaction.response.send_message(content=f'{interaction.user.mention} You are not allowed to '
-                                                                f'close this thread. Only the user or members with role'
-                                                                f' @contributors can do so', ephemeral=True,
-                                                        delete_after=30)
+                if interaction.user.id in all_role_members or interaction.user.id == 360367188432912385:
+                    await thread.delete()
+                else:
+                    await interaction.response.send_message(
+                        content=f'{interaction.user.mention} You are not allowed to '
+                                f'close this thread. Only the user or members with role'
+                                f' @contributors can do so', ephemeral=True,
+                        delete_after=30)
         else:
             await interaction.response.send_message(content=f'This command works only in thread', ephemeral=True,
                                                     delete_after=30)
